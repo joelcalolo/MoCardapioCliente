@@ -1,39 +1,83 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
-import 'react-native-reanimated';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
+import { Ionicons } from '@expo/vector-icons';
+import HomeScreen from './HomeScreen';
+import DishDetailsScreen from './DishDetailsScreen';
+import CartScreen from './CartScreen';
+import CheckoutScreen from './CheckoutScreen';
+import TrackingScreen from './TrackingScreen';
+import LoginScreen from './LoginScreen';
+import ProfileScreen from './ProfileScreen';
+import RegisterScreen from './RegisterScreen';
+import OrderHistoryScreen from './OrderHistoryScreen';
 
-import { useColorScheme } from '@/hooks/useColorScheme';
+const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
-SplashScreen.preventAutoHideAsync();
+// Stack Navigator para as telas que não fazem parte do Tab
+const MainStack = () => (
+  <Stack.Navigator>
+    <Stack.Screen 
+      name="TabNavigator" 
+      component={TabNavigator} 
+      options={{ headerShown: false }}
+    />
+    <Stack.Screen name="DishDetails" component={DishDetailsScreen} />
+    <Stack.Screen name="Checkout" component={CheckoutScreen} />
+    <Stack.Screen name="Tracking" component={TrackingScreen} />
+    <Stack.Screen name="OrderHistory" component={OrderHistoryScreen} />
+  </Stack.Navigator>
+);
 
-export default function RootLayout() {
-  const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
-    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
-  });
+// Tab Navigator para as telas principais
+const TabNavigator = () => (
+  <Tab.Navigator screenOptions={{ headerShown: false }}>
+    <Tab.Screen
+      name="Home"
+      component={HomeScreen}
+      options={{
+        tabBarIcon: ({ color }) => <Ionicons name="home" size={24} color={color} />,
+      }}
+    />
+    <Tab.Screen
+      name="Cart"
+      component={CartScreen}
+      options={{
+        tabBarIcon: ({ color }) => <Ionicons name="cart" size={24} color={color} />,
+      }}
+    />
+    <Tab.Screen
+      name="Profile"
+      component={ProfileScreen}
+      options={{
+        tabBarIcon: ({ color }) => <Ionicons name="person" size={24} color={color} />,
+      }}
+    />
+  </Tab.Navigator>
+);
 
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
+// Auth Stack para telas de autenticação
+const AuthStack = () => (
+  <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Screen name="Login" component={LoginScreen} />
+    <Stack.Screen name="Register" component={RegisterScreen} />
+  </Stack.Navigator>
+);
 
-  if (!loaded) {
-    return null;
-  }
+// Root Navigator que controla a navegação principal
+const RootNavigator = () => {
+  // Aqui você pode adicionar lógica para verificar se o usuário está autenticado
+  const isAuthenticated = true; // Substitua por sua lógica de autenticação
 
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="+not-found" />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      {isAuthenticated ? (
+        <Stack.Screen name="Main" component={MainStack} />
+      ) : (
+        <Stack.Screen name="Auth" component={AuthStack} />
+      )}
+    </Stack.Navigator>
   );
-}
+};
+
+export default RootNavigator;
