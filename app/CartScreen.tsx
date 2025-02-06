@@ -34,6 +34,7 @@ const CartScreen = () => {
 
       if (cartItems.length === 0) {
         Alert.alert('Erro', 'Seu carrinho está vazio');
+        setIsLoading(false);
         return;
       }
 
@@ -46,17 +47,22 @@ const CartScreen = () => {
         }))
       };
 
-      const response = await CartService.createOrder(orderData.fornecedor_id, cartItems);
+      const token = await AsyncStorage.getItem('@MoCardapio:token'); // Obtenha o token de autenticação
+      if (!token) {
+        Alert.alert('Erro', 'Token de autenticação não encontrado');
+        setIsLoading(false);
+        return;
+      }
+
+      const response = await CartService.createOrder(orderData.fornecedor_id, orderData.itens, token);
       await CartService.clearCart();
       setCartItems([]);
       Alert.alert('Sucesso', 'Pedido realizado com sucesso!', [
         { text: 'OK', onPress: () => navigation.navigate('Checkout', { orderId: response.id }) }
       ]);
     } catch (error) {
-      console.error('Erro ao finalizar pedido: ', error);
-      Alert.alert('Erro', 'Não foi possível finalizar o pedido. Tente novamente.');
-    } finally {
       setIsLoading(false);
+      Alert.alert('Erro', 'Ocorreu um erro ao realizar o pedido');
     }
   };
 

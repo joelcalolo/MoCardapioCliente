@@ -72,4 +72,24 @@ const CartService = {
   }
 };
 
+const createOrder = async (fornecedorId: string, itens: any[], token: string) => {
+  const response = await fetch('http://localhost:3000/api/orders', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}` // Adicione o token de autenticação
+    },
+    body: JSON.stringify({
+      fornecedor_id: fornecedorId,
+      itens: itens
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error('Erro ao criar o pedido');
+  }
+
+  return await response.json();
+};
+
 export default CartService;

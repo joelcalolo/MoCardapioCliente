@@ -1,6 +1,8 @@
+import React, { useContext, useEffect, useState } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import HomeScreen from './HomeScreen';
 import DishDetailsScreen from './DishDetailsScreen';
 import CartScreen from './CartScreen';
@@ -10,6 +12,7 @@ import LoginScreen from './LoginScreen';
 import ProfileScreen from './ProfileScreen';
 import RegisterScreen from './RegisterScreen';
 import OrderHistoryScreen from './OrderHistoryScreen';
+import AuthContext, { AuthProvider } from '../context/AuthContext';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -66,8 +69,23 @@ const AuthStack = () => (
 
 // Root Navigator que controla a navegação principal
 const RootNavigator = () => {
-  // Aqui você pode adicionar lógica para verificar se o usuário está autenticado
-  const isAuthenticated = true; // Substitua por sua lógica de autenticação
+  const { user, token } = useContext(AuthContext);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = await AsyncStorage.getItem('@MoCardapio:token');
+      setIsAuthenticated(!!token);
+      setLoading(false);
+    };
+
+    checkAuth();
+  }, []);
+
+  if (loading) {
+    return null; // Ou um componente de carregamento
+  }
 
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -80,4 +98,10 @@ const RootNavigator = () => {
   );
 };
 
-export default RootNavigator;
+const App = () => (
+  <AuthProvider>
+    <RootNavigator />
+  </AuthProvider>
+);
+
+export default App;
