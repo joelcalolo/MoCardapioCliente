@@ -19,30 +19,32 @@ type HomeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Home'>;
 const HomeScreen = () => {
   const navigation = useNavigation<HomeScreenNavigationProp>();
   const [searchQuery, setSearchQuery] = useState('');
-  const [restaurants, setRestaurants] = useState([]);
-  const [filteredRestaurants, setFilteredRestaurants] = useState([]);
+  const [dishes, setDishes] = useState([]);
+  const [filteredDishes, setFilteredDishes] = useState([]);
 
-  // Buscar restaurantes da API
+  // Buscar pratos da API
   useEffect(() => {
-    const fetchRestaurants = async () => {
+    const fetchDishes = async () => {
       try {
         const response = await api.get('/menus');
-        setRestaurants(response.data);
-        setFilteredRestaurants(response.data); // Inicializa com todos os restaurantes
+        setDishes(response.data);
+        setFilteredDishes(response.data); // Inicializa com todos os pratos
       } catch (error) {
-        console.error('Erro ao buscar restaurantes:', error);
+        console.error('Erro ao buscar pratos:', error);
       }
     };
-    fetchRestaurants();
+    fetchDishes();
   }, []);
 
-  // Filtrar restaurantes com base na busca
+  // Filtrar pratos com base na busca e disponibilidade
   useEffect(() => {
-    const filtered = restaurants.filter((restaurant) =>
-      restaurant.nome.toLowerCase().includes(searchQuery.toLowerCase())
+    const filtered = dishes.filter(
+      (dish) =>
+        dish.nome.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        dish.disponivel
     );
-    setFilteredRestaurants(filtered);
-  }, [searchQuery]);
+    setFilteredDishes(filtered);
+  }, [searchQuery, dishes]);
 
   // Navegar para a tela de detalhes do prato
   const handleDishPress = (dish) => {
@@ -53,15 +55,15 @@ const HomeScreen = () => {
     <View style={styles.container}>
       {/* Barra de busca */}
       <TextInput
-        placeholder="Buscar restaurantes..."
+        placeholder="Buscar pratos..."
         value={searchQuery}
         onChangeText={setSearchQuery}
         style={styles.searchBar}
       />
 
-      {/* Lista de restaurantes */}
+      {/* Lista de pratos */}
       <FlatList
-        data={filteredRestaurants}
+        data={filteredDishes}
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => (
           <TouchableOpacity
@@ -69,9 +71,9 @@ const HomeScreen = () => {
             onPress={() => handleDishPress(item)}
           >
             <View style={styles.textContainer}>
-              <Text style={styles.restaurantName}>{item.nome}</Text>
-              <Text style={styles.restaurantDescription}>{item.descricao}</Text>
-              <Text style={styles.restaurantPrice}>
+              <Text style={styles.dishName}>{item.nome}</Text>
+              <Text style={styles.dishDescription}>{item.descricao}</Text>
+              <Text style={styles.dishPrice}>
                 Preço: Kz {parseFloat(item.preco || 0).toFixed(2)}
               </Text>
             </View>
@@ -124,17 +126,17 @@ const styles = StyleSheet.create({
   textContainer: {
     flex: 1, // Faz com que o texto ocupe o máximo de espaço disponível
   },
-  restaurantName: {
+  dishName: {
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 8,
   },
-  restaurantDescription: {
+  dishDescription: {
     fontSize: 14,
     color: '#666',
     marginBottom: 8,
   },
-  restaurantPrice: {
+  dishPrice: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#333',

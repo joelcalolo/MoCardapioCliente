@@ -1,24 +1,24 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import FloatingCartButton from '../components/FloatingCartButton';
-import CartService from '../services/CartService';
+import OrderService from '../services/OrderService'; // Atualize para importar o serviço de pedidos
 
 const DishDetailsScreen = ({ route, navigation }) => {
   const { dish } = route.params;
 
-  const handleAddToCart = async () => {
+  const handlePlaceOrder = async () => {
     try {
-      await CartService.addToCart({
+      await OrderService.createOrder({
         prato_id: dish.id,
         quantidade: 1,
         nome: dish.nome,
         preco: dish.preco,
       });
-      Alert.alert('Sucesso', 'Item adicionado ao carrinho!');
-      // Navegar para a tela de carrinho
-      navigation.navigate('Cart');
+      Alert.alert('Sucesso', 'Pedido realizado com sucesso!');
+      // Navegar para a tela de pedidos ou outra tela apropriada
+      navigation.navigate('Orders');
     } catch (error) {
-      Alert.alert('Erro', 'Não foi possível adicionar ao carrinho');
+      Alert.alert('Erro', 'Não foi possível realizar o pedido');
     }
   };
 
@@ -29,8 +29,8 @@ const DishDetailsScreen = ({ route, navigation }) => {
         <Text style={styles.title}>{dish.nome}</Text>
         <Text style={styles.description}>{dish.descricao}</Text>
         <Text style={styles.price}>Preço: Kz {Number(dish.preco).toFixed(2)}</Text>
-        <TouchableOpacity style={styles.addToCartButton} onPress={handleAddToCart}>
-          <Text style={styles.buttonText}>Adicionar ao Carrinho</Text>
+        <TouchableOpacity style={styles.placeOrderButton} onPress={handlePlaceOrder}>
+          <Text style={styles.buttonText}>Fazer Pedido</Text>
         </TouchableOpacity>
       </View>
       <FloatingCartButton />
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     color: '#E44D26',
     marginBottom: 20,
   },
-  addToCartButton: {
+  placeOrderButton: {
     backgroundColor: '#E44D26',
     paddingVertical: 12,
     borderRadius: 8,

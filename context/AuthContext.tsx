@@ -29,17 +29,25 @@ export const AuthProvider: React.FC = ({ children }) => {
   }, []);
 
   const signIn = async (user: string, token: string) => {
-    await AsyncStorage.setItem('@MoCardapio:user', user);
-    await AsyncStorage.setItem('@MoCardapio:token', token);
-    setUser(user);
-    setToken(token);
+    try {
+      await AsyncStorage.setItem('@MoCardapio:user', user);
+      await AsyncStorage.setItem('@MoCardapio:token', token);
+      setUser(user);
+      setToken(token);
+    } catch (error) {
+      console.error('Erro ao armazenar o token', error);
+    }
   };
 
   const signOut = async () => {
-    await AsyncStorage.removeItem('@MoCardapio:user');
-    await AsyncStorage.removeItem('@MoCardapio:token');
-    setUser(null);
-    setToken(null);
+    try {
+      await AsyncStorage.removeItem('@MoCardapio:user');
+      await AsyncStorage.removeItem('@MoCardapio:token');
+      setUser(null);
+      setToken(null);
+    } catch (error) {
+      console.error('Erro ao remover o token', error);
+    }
   };
 
   return (
